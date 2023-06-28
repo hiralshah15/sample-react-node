@@ -1,0 +1,128 @@
+.account-modal {
+  .ant-modal-close-x {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #5800aa;
+    line-height: 34px;
+    color: #fff;
+    margin-top: 22px;
+    margin-right: 22px;
+    outline: none;
+  }
+
+  .ant-modal-content {
+    margin: 0 auto;
+    background: #F3F4F6;
+    border-radius: 10px;
+
+    h3 {
+      font-size: 24px;
+      color: #31353B;
+      font-family: 'Literata', serif;
+      font-weight: 500;
+    }
+
+    .form-group {
+      .ant-select {
+        width: 100% !important;
+      }
+
+      .ant-select-arrow-icon {
+        svg {
+          display: none;
+        }
+
+        :before {
+          content: '\e900';
+        }
+      }
+
+      .row {
+        margin: 0px -2px;
+        margin-top: 10px;
+
+        .col-md-6, .col-sm-12 {
+          padding: 0px 2px;
+        }
+      }
+    }
+
+    .submit-btn[disabled] {
+      cursor: no-drop;
+    }
+
+    .submit-btn:not[disabled] {
+      background: #5800aa !important;
+    }
+
+    .send-invitation {
+      background: #fff;
+      margin: -24px;
+      padding: 16px;
+      border-radius: 0px 0px 10px 10px;
+    }
+
+    .modal-right-head {
+      margin-bottom: 30px;
+    }
+  }
+}
+
+.admin-dashboard {
+  .row {
+    margin: 0;
+  }
+}
+
+.add-school {
+  span {
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+.left-upload-img {
+  .user-image {
+    display: inline-block;
+    margin-bottom: 0;
+  }
+
+  .upload-img {
+    display: inline-block;
+    margin-bottom: 0;
+    margin-left: 15px;
+    font-weight: bold;
+    line-height: 28px;
+  }
+
+  div {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .form-group {
+    margin-bottom: 0 !important;
+  }
+}
+
+.ant-upload.ant-upload-select-picture-card {
+  width: 100%;
+  float: none;
+  display: block;
+  height: auto;
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+.bootstrap-select.btn-group.show-tick .dropdown-menu li.selected a span.check-mark {
+  position: absolute;
+  display: inline-block;
+  left: 5px; //changed from right:15
+  margin-top: 5px;
+}
+
+.resources:focus {
+  border: 1px solid #5800AA;
+  border-radius: 5px;
+}

@@ -1,0 +1,114 @@
+service: counslr-webapp
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+
+plugins:
+  - serverless-finch
+  - serverless-cloudfront-invalidate
+
+custom:
+  subdomain:
+    dev: "dev.app"
+    stage: "stage.app"
+    prod: "counselors"
+  fqdn: "${self:custom.subdomain.${self:provider.stage}}.counslr.com"
+  client:
+    bucketName: "${file(helpers.js):getAccountId}-${self:service}-${self:provider.stage}"
+    distributionFolder: build
+  cloudfrontInvalidate:
+    distributionIdKey: DistributionId
+    items:
+      - "/*"
+resources:
+  Resources:
+    Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: "${file(helpers.js):getAccountId}-${self:service}-${self:provider.stage}"
+        AccessControl: PublicRead
+        WebsiteConfiguration:
+          IndexDocument: 'index.html'
+          ErrorDocument: 'index.html'
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: "*"
+              Action: s3:GetObject
+              Resource:
+                Fn::Join:
+                  - ''
+                  - - Fn::GetAtt:
+                        - Bucket
+                        - Arn
+                    - "/*"
+        Bucket:
+          Ref: Bucket
+    Distribution:
+      Type: "AWS::CloudFront::Distribution"
+      Properties:
+        DistributionConfig:
+          Comment: "${self:service}-${self:provider.stage}"
+          HttpVersion: http2
+          PriceClass: PriceClass_All
+          IPV6Enabled: true
+          Enabled: true
+          Aliases:
+            - "${self:custom.fqdn}"
+          ViewerCertificate:
+            AcmCertificateArn: !ImportValue CounslrCertificateArn
+            SslSupportMethod: "sni-only"
+          Origins:
+            - Id: web
+              DomainName:
+                'Fn::Select':
+                  - 1
+                  - 'Fn::Split':
+                      - '//'
+                      - 'Fn::GetAtt':
+                          - Bucket
+                          - WebsiteURL
+              CustomOriginConfig:
+                OriginProtocolPolicy: 'http-only'
+          DefaultCacheBehavior:
+            TargetOriginId: web
+            ForwardedValues:
+              QueryString: true
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+            ViewerProtocolPolicy: "redirect-to-https"
+    HostedZone:
+      Type: "AWS::Route53::HostedZone"
+      Properties:
+        Name: "${self:custom.fqdn}"
+    RecordSet:
+      Type: "AWS::Route53::RecordSetGroup"
+      Properties:
+        HostedZoneId: !Ref HostedZone
+        RecordSets:
+          - Name: "${self:custom.fqdn}"
+            Type: A
+            AliasTarget:
+              HostedZoneId: "Z2FDTNDATAQYW2"
+              DNSName: !GetAtt Distribution.DomainName
+          - Name: "${self:custom.fqdn}"
+            Type: AAAA
+            AliasTarget:
+              HostedZoneId: "Z2FDTNDATAQYW2"
+              DNSName: !GetAtt Distribution.DomainName
+  Outputs:
+    DistributionId:
+      Value: !Ref Distribution
